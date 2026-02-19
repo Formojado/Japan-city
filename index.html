@@ -21,7 +21,8 @@
     .city-card {min-width:300px;text-align:center;opacity:0.2;transform:scale(0.8);transition:0.5s;color:#475569;}
     .city-card.active {opacity:1;transform:scale(1.1);color:#0f172a;}
     .city-name-jp{font-size:2.2rem;font-weight:900;display:block; text-shadow: 0 2px 4px rgba(255,255,255,0.8); font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;}
-    .active-frame {position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:320px;height:85px;border:4px solid #e11d48;background:rgba(255,255,255,0.4);border-radius:16px;}
+    .city-name-en{font-size:1rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px;}
+    .active-frame {position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:320px;height:95px;border:4px solid #e11d48;background:rgba(255,255,255,0.4);border-radius:16px;}
 
     /* Confirmation UI */
     #confirmContainer {
@@ -79,11 +80,11 @@
   <div id="overlayStart" class="overlay">
     <div class="box">
       <h1 style="margin:0">Japan Speedrun</h1>
-      <p style="color:#64748b">Identify Japanese cities on the map.</p>
+      <p style="color:#64748b">Locate cities using the Japanese map labels.</p>
       <div class="slider-container">
         <div style="text-align:center"><span id="cityCountVal" class="count-display">30</span></div>
         <input type="range" id="citySlider" min="1" max="100" value="30">
-        <p style="font-size:0.85rem; color:#64748b; text-align: center; margin-top:10px;">Survival Distance: <b>20 km</b></p>
+        <p style="font-size:0.85rem; color:#64748b; text-align: center; margin-top:10px;">Safe Distance: <b>20 km</b></p>
       </div>
       <button id="startBtn" class="btn">START CHALLENGE</button>
     </div>
@@ -98,14 +99,13 @@
   </div>
 
   <script>
-    // Full 100 Cities Database
     const DB = [
       {jp:"東京",en:"Tokyo",coords:[35.6895,139.6917]},{jp:"横浜",en:"Yokohama",coords:[35.4433,139.6358]},{jp:"大阪",en:"Osaka",coords:[34.6937,135.5023]},{jp:"名古屋",en:"Nagoya",coords:[35.1815,136.9066]},{jp:"札幌",en:"Sapporo",coords:[43.0611,141.3564]},{jp:"福岡",en:"Fukuoka",coords:[33.5904,130.4017]},{jp:"神戸",en:"Kobe",coords:[34.6901,135.1955]},{jp:"川崎",en:"Kawasaki",coords:[35.5308,139.7029]},{jp:"京都",en:"Kyoto",coords:[35.0116,135.7681]},{jp:"さいたま",en:"Saitama",coords:[35.8617,139.6455]},
       {jp:"広島",en:"Hiroshima",coords:[34.3853,132.4553]},{jp:"仙台",en:"Sendai",coords:[38.2682,140.8694]},{jp:"千葉",en:"Chiba",coords:[35.6074,140.1065]},{jp:"北九州",en:"Kitakyushu",coords:[33.8835,130.8752]},{jp:"堺",en:"Sakai",coords:[34.5734,135.483]},{jp:"浜松",en:"Hamamatsu",coords:[34.7034,137.7348]},{jp:"熊本",en:"Kumamoto",coords:[32.8032,130.7079]},{jp:"相模原",en:"Sagamihara",coords:[35.5751,139.3734]},{jp:"岡山",en:"Okayama",coords:[34.6551,133.9195]},{jp:"静岡",en:"Shizuoka",coords:[34.9756,138.3825]},
       {jp:"新潟",en:"Niigata",coords:[37.9162,139.0364]},{jp:"鹿児島",en:"Kagoshima",coords:[31.5967,130.5571]},{jp:"金沢",en:"Kanazawa",coords:[36.5613,136.6562]},{jp:"宇都宮",en:"Utsunomiya",coords:[36.5551,139.8826]},{jp:"松山",en:"Matsuyama",coords:[33.8392,132.765]},{jp:"大分",en:"Oita",coords:[33.2382,131.6126]},{jp:"倉敷",en:"Kurashiki",coords:[34.585,133.7722]},{jp:"高松",en:"Takamatsu",coords:[34.3428,134.0465]},{jp:"長崎",en:"Nagasaki",coords:[32.7503,129.8779]},{jp:"那覇",en:"Naha",coords:[26.2124,127.6809]},
       {jp:"青森",en:"Aomori",coords:[40.8244,140.74]},{jp:"盛岡",en:"Morioka",coords:[39.7036,141.1527]},{jp:"秋田",en:"Akita",coords:[39.7186,140.1024]},{jp:"山形",en:"Yamagata",coords:[38.2554,140.3396]},{jp:"福島",en:"Fukushima",coords:[37.7608,140.4747]},{jp:"水戸",en:"Mito",coords:[36.3659,140.4714]},{jp:"前橋",en:"Maebashi",coords:[36.3895,139.0634]},{jp:"甲府",en:"Kofu",coords:[35.6621,138.5683]},{jp:"長野",en:"Nagano",coords:[36.6485,138.1942]},{jp:"富山",en:"Toyama",coords:[36.6953,137.2113]},
       {jp:"福井",en:"Fukui",coords:[36.0641,136.2196]},{jp:"岐阜",en:"Gifu",coords:[35.4233,136.7607]},{jp:"津",en:"Tsu",coords:[34.7186,136.5052]},{jp:"大津",en:"Otsu",coords:[35.0178,135.8547]},{jp:"奈良",en:"Nara",coords:[34.6851,135.8048]},{jp:"和歌山",en:"Wakayama",coords:[34.2305,135.1708]},{jp:"鳥取",en:"Tottori",coords:[35.5011,134.2351]},{jp:"松江",en:"Matsue",coords:[35.4682,133.0484]},{jp:"山口",en:"Yamaguchi",coords:[34.1785,131.4737]},{jp:"徳島",en:"Tokushima",coords:[34.0704,134.5548]},
-      {jp:"高知",en:"Kochi",coords:[33.5597,133.5311]},{jp:"佐賀",en:"Saga",coords:[33.2635,130.3008]},{jp:"宮崎",en:"Miyazaki",coords:[31.9077,131.4202]},{jp:"旭川",en:"Asahikawa",coords:[43.7706,142.3648]},{jp:"函館",en:"Hakodate",coords:[41.7687,140.7288]},{jp:"釧路",en:"Kushiro",coords:[42.9849,144.3818]},{jp:"苫小牧",en:"Tomakomai",coords:[42.6343,141.6054]},{jp:"小樽",en:"Otaru",coords:[43.1907,141.0032]},{jp:"帯広",en:"Obihiro",coords:[42.9239,143.1961]},{jp:"北見",en:"Kitami",coords:[43.8035,143.8943]},
+      {jp:"高知",en:"Kochi",coords:[33.5597,133.5311]},{jp:"佐賀",en:"Saga",coords:[33.2635,130.3008]},{jp:"宮崎",en:"Miyazaki",coords:[31.9077,131.4202]},{jp:"旭川",en:"Asahikawa",coords:[43.7706,142.3648]},{jp:"函館",en:"Hakodate",coords:[41.7687,140.7288]},{jp:"釧路",en:"Kushiro",coords:[42.9849,144.3818]},{jp:"苫小牧",en:"Tomakomai",coords:[42.6343,141.6054]},{jp:"小樽",en:"Otaru",coords:[43.1907,141.0032]},{jp:"帶廣",en:"Obihiro",coords:[42.9239,143.1961]},{jp:"北見",en:"Kitami",coords:[43.8035,143.8943]},
       {jp:"稚内",en:"Wakkanai",coords:[45.4155,141.6733]},{jp:"八戸",en:"Hachinohe",coords:[40.5123,141.4884]},{jp:"いわき",en:"Iwaki",coords:[37.0504,140.8877]},{jp:"郡山",en:"Koriyama",coords:[37.398,140.388]},{jp:"所沢",en:"Tokorozawa",coords:[35.7997,139.4687]},{jp:"川越",en:"Kawagoe",coords:[35.915,139.4856]},{jp:"船橋",en:"Funabashi",coords:[35.6947,139.9826]},{jp:"松戸",en:"Matsudo",coords:[35.7847,139.9029]},{jp:"柏",en:"Kashiwa",coords:[35.8622,139.9773]},{jp:"八王子",en:"Hachioji",coords:[35.6555,139.3364]},
       {jp:"町田",en:"Machida",coords:[35.5467,139.4464]},{jp:"藤沢",en:"Fujisawa",coords:[35.3392,139.4867]},{jp:"横須賀",en:"Yokosuka",coords:[35.2814,139.6722]},{jp:"平塚",en:"Hiratsuka",coords:[35.3338,139.3494]},{jp:"越谷",en:"Koshigaya",coords:[35.8911,139.7911]},{jp:"日光",en:"Nikko",coords:[36.7481,139.6101]},{jp:"軽井沢",en:"Karuizawa",coords:[36.3488,138.6353]},{jp:"成田",en:"Narita",coords:[35.777,140.3188]},{jp:"鎌倉",en:"Kamakura",coords:[35.3192,139.5467]},{jp:"箱根",en:"Hakone",coords:[35.2324,139.1033]},
       {jp:"熱海",en:"Atami",coords:[35.0964,139.0717]},{jp:"下関",en:"Shimonoseki",coords:[33.9577,130.9406]},{jp:"別府",en:"Beppu",coords:[33.2844,131.4907]},{jp:"石垣",en:"Ishigaki",coords:[24.3407,124.1561]},{jp:"宮古島",en:"Miyakojima",coords:[24.805,125.2811]},{jp:"出雲",en:"Izumo",coords:[35.3664,132.7567]},{jp:"尾道",en:"Onomichi",coords:[34.4094,133.1942]},{jp:"今治",en:"Imabari",coords:[34.0662,132.9978]},{jp:"宇和島",en:"Uwajima",coords:[33.2235,132.5606]},{jp:"佐世保",en:"Sasebo",coords:[33.1799,129.7151]},
@@ -115,10 +115,7 @@
     let cities=[], idx=0, score=0, startTime, timer, started=false, gameOver=false, deathCity="";
     let currentClickPos = null, tempMarker = null;
 
-    // Use GSI (Japan) or OSM with Japanese labels
     const map = L.map('map',{zoomControl:false, attributionControl: false}).setView([37, 137], 5);
-    
-    // Primary Tile Source: Japan GSI (Official & Pure Japanese)
     L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png').addTo(map);
 
     const slider = document.getElementById('citySlider');
@@ -135,7 +132,7 @@
       cities.forEach(c => {
         const el = document.createElement('div');
         el.className = 'city-card';
-        el.innerHTML = `<span class="city-name-jp">${c.jp}</span>`;
+        el.innerHTML = `<span class="city-name-jp">${c.jp}</span><span class="city-name-en">${c.en}</span>`;
         belt.appendChild(el);
       });
 
@@ -177,13 +174,12 @@
       
       document.getElementById('confirmContainer').style.display = 'none';
 
-      // Lines & Correct Location
       const line = L.polyline([currentClickPos, city.coords], {color: '#e11d48', weight: 3, dashArray: '8, 8'}).addTo(map);
       const targetMarker = L.circle(city.coords, {radius: 20000, color: '#22c55e', weight: 2, fillOpacity: 0.2}).addTo(map);
-      const infoPopup = L.popup().setLatLng(city.coords).setContent(`<b>${city.jp}</b><br>${dist.toFixed(1)} km`).openOn(map);
+      const infoPopup = L.popup().setLatLng(city.coords).setContent(`<b>${city.jp} (${city.en})</b><br>${dist.toFixed(1)} km`).openOn(map);
 
       if(dist > 20) {
-        gameOver = true; deathCity = city.jp;
+        gameOver = true; deathCity = `${city.jp} (${city.en})`;
       } else {
         score += Math.max(1, 100 - Math.round(dist * 5));
         document.getElementById('score').textContent = score;
