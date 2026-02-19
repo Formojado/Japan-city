@@ -56,7 +56,7 @@
   </div>
   <div id="confirmContainer"><button class="btn-confirm" id="confirmBtn">CONFIRM [SPACE]</button></div>
 
-  <div id="startModal" class="modal-overlay"><div class="modal-box"><h1>Japan Speedrun</h1><div style="margin:40px 0;"><div style="font-size: 5rem; font-weight:900; color:var(--primary)" id="countDisplay">20</div><input type="range" id="citySlider" min="5" max="50" value="20" style="width:100%;"></div><button id="startBtn" class="btn-start">START (ENTER)</button></div></div>
+  <div id="startModal" class="modal-overlay"><div class="modal-box"><h1>Japan Speedrun</h1><div style="margin:40px 0;"><div style="font-size: 5rem; font-weight:900; color:var(--primary)" id="countDisplay">20</div><input type="range" id="citySlider" min="5" max="60" value="20" style="width:100%;"></div><button id="startBtn" class="btn-start">START (ENTER)</button></div></div>
   
   <div id="endModal" class="modal-overlay" style="display:none; background:rgba(0,0,0,0.95)">
     <div class="modal-box">
@@ -68,7 +68,10 @@
   </div>
 
   <script>
-    const DB = [{jp:"東京",en:"Tokyo",coords:[35.6813,139.7671]},{jp:"横浜",en:"Yokohama",coords:[35.4433,139.6358]},{jp:"大阪",en:"Osaka",coords:[34.6937,135.5023]},{jp:"名古屋",en:"Nagoya",coords:[35.1815,136.9066]},{jp:"札幌",en:"Sapporo",coords:[43.0611,141.3564]},{jp:"福岡",en:"Fukuoka",coords:[33.5904,130.4017]},{jp:"神戸",en:"Kobe",coords:[34.6901,135.1955]},{jp:"京都",en:"Kyoto",coords:[35.0116,135.7681]},{jp:"広島",en:"Hiroshima",coords:[34.3853,132.4553]},{jp:"仙台",en:"Sendai",coords:[38.2682,140.8694]},{jp:"金沢",en:"Kanazawa",coords:[36.5613,136.6562]},{jp:"鹿児島",en:"Kagoshima",coords:[31.5967,130.5571]},{jp:"奈良",en:"Nara",coords:[34.6851,135.8048]},{jp:"那覇",en:"Naha",coords:[26.2124,127.6809]},{jp:"函館",en:"Hakodate",coords:[41.7687,140.7288]},{jp:"松山",en:"Matsuyama",coords:[33.8392,132.765]},{jp:"熊本",en:"Kumamoto",coords:[32.8032,130.7079]},{jp:"岡山",en:"Okayama",coords:[34.6551,133.9195]},{jp:"静岡",en:"Shizuoka",coords:[34.9756,138.3825]},{jp:"新潟",en:"Niigata",coords:[37.9162,139.0364]}];
+    const DB = [
+      {jp:"東京",en:"Tokyo",coords:[35.6813,139.7671]},{jp:"横浜",en:"Yokohama",coords:[35.4433,139.6358]},{jp:"大阪",en:"Osaka",coords:[34.6937,135.5023]},{jp:"名古屋",en:"Nagoya",coords:[35.1815,136.9066]},{jp:"札幌",en:"Sapporo",coords:[43.0611,141.3564]},{jp:"福岡",en:"Fukuoka",coords:[33.5904,130.4017]},{jp:"神戸",en:"Kobe",coords:[34.6901,135.1955]},{jp:"京都",en:"Kyoto",coords:[35.0116,135.7681]},{jp:"広島",en:"Hiroshima",coords:[34.3853,132.4553]},{jp:"仙台",en:"Sendai",coords:[38.2682,140.8694]},{jp:"金沢",en:"Kanazawa",coords:[36.5613,136.6562]},{jp:"鹿児島",en:"Kagoshima",coords:[31.5967,130.5571]},{jp:"奈良",en:"Nara",coords:[34.6851,135.8048]},{jp:"那覇",en:"Naha",coords:[26.2124,127.6809]},{jp:"函館",en:"Hakodate",coords:[41.7687,140.7288]},{jp:"松山",en:"Matsuyama",coords:[33.8392,132.765]},{jp:"熊本",en:"Kumamoto",coords:[32.8032,130.7079]},{jp:"岡山",en:"Okayama",coords:[34.6551,133.9195]},{jp:"静岡",en:"Shizuoka",coords:[34.9756,138.3825]},{jp:"新潟",en:"Niigata",coords:[37.9162,139.0364]},
+      {jp:"青森",en:"Aomori",coords:[40.8243,140.74]},{jp:"秋田",en:"Akita",coords:[39.7198,140.1023]},{jp:"盛岡",en:"Morioka",coords:[39.7036,141.1527]},{jp:"山形",en:"Yamagata",coords:[38.2554,140.3396]},{jp:"福島",en:"Fukushima",coords:[37.7608,140.4747]},{jp:"水戶",en:"Mito",coords:[36.3659,140.4714]},{jp:"宇都宮",en:"Utsunomiya",coords:[36.5551,139.8826]},{jp:"前橋",en:"Maebashi",coords:[36.3895,139.0634]},{jp:"さいたま",en:"Saitama",coords:[35.8617,139.6455]},{jp:"千葉",en:"Chiba",coords:[35.6073,140.1063]},{jp:"長野",en:"Nagano",coords:[36.6485,138.1942]},{jp:"岐阜",en:"Gifu",coords:[35.4233,136.7607]},{jp:"津",en:"Tsu",coords:[34.7186,136.5052]},{jp:"大津",en:"Otsu",coords:[35.0177,135.8549]},{jp:"和歌山",en:"Wakayama",coords:[34.2305,135.1708]},{jp:"鳥取",en:"Tottori",coords:[35.5011,134.2351]},{jp:"松江",en:"Matsue",coords:[35.4681,133.0484]},{jp:"高松",en:"Takamatsu",coords:[34.3428,134.0466]},{jp:"徳島",en:"Tokushima",coords:[34.0703,134.5548]},{jp:"高知",en:"Kochi",coords:[33.5597,133.5311]},{jp:"佐賀",en:"Saga",coords:[33.2635,130.3008]},{jp:"長崎",en:"Nagasaki",coords:[32.7501,129.8773]},{jp:"大分",en:"Oita",coords:[33.2396,131.6097]},{jp:"宮崎",en:"Miyazaki",coords:[31.9077,131.4202]},{jp:"旭川",en:"Asahikawa",coords:[43.7706,142.3648]},{jp:"釧路",en:"Kushiro",coords:[42.9849,144.3818]},{jp:"小樽",en:"Otaru",coords:[43.1907,140.9946]},{jp:"八戶",en:"Hachinohe",coords:[40.5122,141.4883]},{jp:"郡山",en:"Koriyama",coords:[37.398,140.3888]},{jp:"いわき",en:"Iwaki",coords:[37.0504,140.8877]},{jp:"高崎",en:"Takasaki",coords:[36.3219,139.0033]},{jp:"川越",en:"Kawagoe",coords:[35.9145,139.482]},{jp:"船橋",en:"Funabashi",coords:[35.6947,139.9826]},{jp:"相模原",en:"Sagamihara",coords:[35.572,139.3741]},{jp:"橫須賀",en:"Yokosuka",coords:[35.2815,139.6675]},{jp:"富山",en:"Toyama",coords:[36.6953,137.2113]},{jp:"福井",en:"Fukui",coords:[36.0641,136.2196]},{jp:"甲府",en:"Kofu",coords:[35.6621,138.5683]},{jp:"豐田",en:"Toyota",coords:[35.0824,137.1562]},{jp:"堺",en:"Sakai",coords:[34.5732,135.4831]},{jp:"姬路",en:"Himeji",coords:[34.8151,134.6853]}
+    ];
 
     let cities=[], idx=0, score=0, startTime, timer, started=false, isProcessing=false;
     let currentClickPos = null, playerMarker = null, targetMarker = null, connectorLine = null;
@@ -78,7 +81,8 @@
 
     function startGame() {
       if(started) return;
-      const count = parseInt(document.getElementById('citySlider').value);
+      let count = parseInt(document.getElementById('citySlider').value);
+      count = Math.min(count, DB.length);
       cities = [...DB].sort(()=>Math.random()-0.5).slice(0, count);
       document.getElementById('total').textContent = cities.length;
       document.getElementById('startModal').style.display = 'none';
