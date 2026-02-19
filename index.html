@@ -1,189 +1,191 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Russia City Speedrun - Survival Mode</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <title>Japan 40 Speedrun</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    html,body{height:100%;margin:0;font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;background:#0f1724;color:#e6eef8;overflow:hidden;}
-    #map{height:100vh;width:100vw;position:relative;z-index: 1;}
+    html,body{height:100%;margin:0;font-family:'Hiragino Kaku Gothic ProN', 'Inter', sans-serif;background:#f8fafc;color:#0f172a;overflow:hidden;}
+    #map{height:100vh;width:100vw;z-index: 1;}
 
-    /* 開始畫面 */
-    .overlay-start{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(15, 23, 42, 0.95);z-index:1000;}
-    .start-box{background:#fff;color:#04263b;padding:40px;border-radius:24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.6);max-width:450px; line-height: 1.6;}
-    .start-box h2{margin:0 0 15px 0; color:#1e293b; font-size: 2rem;}
-    
-    /* 頂部資訊欄 */
-    .info-bar{position:absolute;top:15px;left:50%;transform:translateX(-50%);background:rgba(15, 23, 42, 0.95);padding:12px 30px;border-radius:18px;display:flex;gap:25px;z-index:900;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);box-shadow:0 8px 32px rgba(0,0,0,0.5);}
-    .info-item{display:flex;flex-direction:column;align-items:center; min-width: 70px;}
-    .info-label{font-size:0.7rem;text-transform:uppercase;letter-spacing:1.5px;opacity:0.6;margin-bottom:4px;}
-    .info-value{font-size:1.3rem;font-weight:800; font-variant-numeric: tabular-nums;}
+    /* Stats Bar */
+    .info-bar{position:absolute;top:20px;right:20px;background:rgba(15, 23, 42, 0.9);padding:15px;border-radius:12px;display:flex;flex-direction:column;gap:10px;z-index:900;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.1);color:#fff;}
+    .info-item{display:flex;justify-content:space-between;align-items:center;min-width:150px; gap: 20px;}
+    .info-label{font-size:0.65rem;text-transform:uppercase;opacity:0.7;}
+    .info-value{font-size:1.15rem;font-weight:800;font-variant-numeric: tabular-nums;}
+    .status-alive{color:#4ade80;} .status-dead{color:#f87171;}
 
-    /* 狀態顏色 - 綠色霓虹效果 */
-    .status-alive{color: #22c55e; text-shadow: 0 0 15px rgba(34,197,94,0.8);}
-    .status-dead{color: #ef4444; text-shadow: 0 0 15px rgba(239,68,68,0.8); animation: blink 0.8s infinite;}
+    /* Conveyor Belt System */
+    .conveyor-viewport {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      height: 150px;
+      z-index: 1001;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .conveyor-belt {
+      display: flex;
+      align-items: center;
+      position: absolute;
+      left: 50%;
+      transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+      height: 100%;
+    }
+    .city-card {
+      min-width: 350px;
+      text-align: center;
+      transition: all 0.5s ease;
+      opacity: 0.4;
+      transform: scale(0.85);
+      color: #475569;
+    }
+    .city-name-jp { font-size: 1.8rem; font-weight: 900; display: block; }
+    .city-name-en { font-size: 1rem; font-weight: 400; opacity: 0.8; display: block; }
 
-    /* 當前目標標題 */
-    .city-title{position:absolute;top:120px;left:50%;transform:translateX(-50%);z-index:1001;font-size:2.5rem;font-weight:900;color:#fff;text-shadow:0 0 25px rgba(0,0,0,1), 4px 4px 0px #e11d48;pointer-events:none;text-align:center;width:100%;}
+    .city-card.active {
+      opacity: 1;
+      transform: scale(1.1);
+      color: #0f172a;
+    }
+    .active-frame {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 370px;
+      height: 90px;
+      border: 4px solid #e11d48; /* 日本版採用紅色系邊框 */
+      background: rgba(255,255,255,0.4);
+      border-radius: 16px;
+      z-index: 1002;
+    }
 
-    .btn{background:#e11d48;color:#fff;border:none;padding:16px 32px;border-radius:14px;font-weight:700;cursor:pointer;font-size:1.1rem;transition:0.2s; margin-top: 15px;}
-    .btn:hover{background:#be123c; transform: translateY(-2px);}
-
-    /* 結算彈窗 */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.92);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(12px);}
-    .modal{background:#fff;color:#04263b;padding:45px;border-radius:28px;width:380px;text-align:center;}
-    
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .overlay{position:fixed;inset:0;background:rgba(15,23,42,0.95);display:flex;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(10px);}
+    .box{background:#fff;color:#1e293b;padding:40px;border-radius:24px;text-align:center;max-width:380px;}
+    .btn{background:#e11d48;color:#fff;border:none;padding:15px 35px;border-radius:10px;font-weight:700;cursor:pointer;font-size:1.1rem;width:100%;margin-top:20px;}
   </style>
 </head>
 <body>
-
   <div id="map"></div>
 
   <div class="info-bar">
-    <div class="info-item"><span class="info-label">Time</span><span id="time" class="info-value">00:00</span></div>
-    <div class="info-item"><span class="info-label">Progress</span><span class="info-value"><span id="progress">0</span>/30</span></div>
-    <div class="info-item"><span class="info-label">Score</span><span id="score" class="info-value">0</span></div>
-    <div class="info-item" id="statusBox" style="display:none;"><span class="info-label">Status</span><span id="aliveStatus" class="info-value status-alive">ALIVE</span></div>
+    <div class="info-item"><span class="info-label">TIME / 時間</span><span id="time" class="info-value">00:00</span></div>
+    <div class="info-item"><span class="info-label">PROGRESS / 進捗</span><span class="info-value"><span id="progress">0</span>/40</span></div>
+    <div class="info-item"><span class="info-label">SCORE / スコア</span><span id="score" class="info-value">0</span></div>
+    <div class="info-item" id="statusBox" style="display:none;"><span class="info-label">STATUS</span><span id="aliveStatus" class="info-value status-alive">ALIVE</span></div>
   </div>
 
-  <div id="overlayStart" class="overlay-start">
-    <div class="start-box">
-      <h2>Russia City Speedrun</h2>
-      <p><b>Survival Rules:</b><br>Russia is vast! Your click must be within <b>100km</b> of the target city.<br>If you miss, you are "OUT", but you can keep playing for practice.</p>
-      <button id="startBtn" class="btn">Start Russian Run</button>
+  <div class="conveyor-viewport">
+    <div class="active-frame"></div>
+    <div class="conveyor-belt" id="belt"></div>
+  </div>
+
+  <div id="overlayStart" class="overlay">
+    <div class="box">
+      <h1 style="margin:0">Japan Speedrun</h1>
+      <p style="color:#64748b">Locate 40 cities in Japan.<br>Accuracy Limit: <b>100km</b></p>
+      <button id="startBtn" class="btn">MISSION START</button>
     </div>
   </div>
 
-  <div class="city-title" id="cityTitle" style="display:none"></div>
-
-  <div id="endModal" style="display:none" class="modal-backdrop">
-    <div class="modal">
-      <h2 id="resultTitle" style="font-size: 2rem; margin-bottom: 10px;">End of Route</h2>
-      <div id="stats" style="font-size:1.2rem; margin: 25px 0; color: #475569; line-height: 1.5;"></div>
-      <button id="playAgainBtn" class="btn">Try Again</button>
+  <div id="endModal" style="display:none" class="overlay">
+    <div class="box">
+      <h2 id="resTitle">FINISHED</h2>
+      <div id="stats" style="margin:15px 0;line-height:1.6"></div>
+      <button onclick="location.reload()" class="btn">RETRY</button>
     </div>
   </div>
 
   <script>
-    // 30個大城市數據 (英俄雙語)
-    const RUSSIA_CITIES = [
-        {name:"Moscow (Москва)",coords:[55.7558,37.6173]},{name:"Saint Petersburg (Санкт-Петербург)",coords:[59.9343,30.3351]},{name:"Novosibirsk (Новосибирск)",coords:[55.0084,82.9357]},{name:"Yekaterinburg (Екатеринбург)",coords:[56.8389,60.6057]},{name:"Kazan (Казань)",coords:[55.7887,49.1221]},{name:"Nizhny Novgorod (Нижний Новгород)",coords:[56.3269,44.0059]},{name:"Chelyabinsk (Челябинск)",coords:[55.1644,61.4368]},{name:"Samara (Самара)",coords:[53.2029,50.1508]},{name:"Omsk (Омск)",coords:[54.9885,73.3242]},{name:"Rostov-on-Don (Ростов-на-Дону)",coords:[47.2357,39.7015]},{name:"Ufa (Уфа)",coords:[54.7388,55.9721]},{name:"Krasnoyarsk (Красноярск)",coords:[56.0153,92.8932]},{name:"Voronezh (Воронеж)",coords:[51.6608,39.2003]},{name:"Perm (Пермь)",coords:[58.0105,56.2502]},{name:"Volgograd (Волгоград)",coords:[48.708,44.5133]},{name:"Krasnodar (Краснодар)",coords:[45.0393,38.9872]},{name:"Saratov (Саратов)",coords:[51.5336,46.0342]},{name:"Tyumen (Тюмень)",coords:[57.1522,65.5272]},{name:"Tolyatti (Тольятти)",coords:[53.5078,49.4192]},{name:"Izhevsk (Ижевск)",coords:[56.8498,53.2045]},{name:"Barnaul (Барнаул)",coords:[53.3497,83.7673]},{name:"Irkutsk (Иркутск)",coords:[52.287,104.305]},{name:"Ulyanovsk (Ульяновск)",coords:[54.3142,48.4031]},{name:"Khabarovsk (Хабаровск)",coords:[48.4726,135.0577]},{name:"Vladivostok (Владивосток)",coords:[43.1198,131.8869]},{name:"Yaroslavl (Ярославль)",coords:[57.6261,39.8845]},{name:"Orenburg (Оренбург)",coords:[51.7666,55.0988]},{name:"Tomsk (Томск)",coords:[56.4977,84.9744]},{name:"Kemerovo (Кемерово)",coords:[55.351,86.0871]},{name:"Astrakhan (Астрахань)",coords:[46.3476,48.0302]}
-    ];
+    window.onload = function() {
+      const CITIES = [
+        {jp:"東京",en:"Tokyo",coords:[35.6895,139.6917]},{jp:"横浜",en:"Yokohama",coords:[35.4433,139.6358]},{jp:"大阪",en:"Osaka",coords:[34.6937,135.5023]},{jp:"名古屋",en:"Nagoya",coords:[35.1815,136.9066]},{jp:"札幌",en:"Sapporo",coords:[43.0611,141.3564]},{jp:"福岡",en:"Fukuoka",coords:[33.5904,130.4017]},{jp:"神戸",en:"Kobe",coords:[34.6901,135.1955]},{jp:"川崎",en:"Kawasaki",coords:[35.5308,139.7029]},{jp:"京都",en:"Kyoto",coords:[35.0116,135.7681]},{jp:"さいたま",en:"Saitama",coords:[35.8617,139.6455]},{jp:"広島",en:"Hiroshima",coords:[34.3853,132.4553]},{jp:"仙台",en:"Sendai",coords:[38.2682,140.8694]},{jp:"千葉",en:"Chiba",coords:[35.6074,140.1065]},{jp:"北九州",en:"Kitakyushu",coords:[33.8835,130.8752]},{jp:"堺",en:"Sakai",coords:[34.5734,135.483]},{jp:"浜松",en:"Hamamatsu",coords:[34.7034,137.7348]},{jp:"熊本",en:"Kumamoto",coords:[32.8032,130.7079]},{jp:"相模原",en:"Sagamihara",coords:[35.5751,139.3734]},{jp:"岡山",en:"Okayama",coords:[34.6551,133.9195]},{jp:"静岡",en:"Shizuoka",coords:[34.9756,138.3825]},{jp:"鹿児島",en:"Kagoshima",coords:[31.5967,130.5571]},{jp:"金沢",en:"Kanazawa",coords:[36.5613,136.6562]},{jp:"宇都宮",en:"Utsunomiya",coords:[36.5551,139.8826]},{jp:"松山",en:"Matsuyama",coords:[33.8392,132.765]},{jp:"大分",en:"Oita",coords:[33.2382,131.6126]},{jp:"長崎",en:"Nagasaki",coords:[32.7503,129.8779]},{jp:"那覇",en:"Naha",coords:[26.2124,127.6809]},{jp:"青森",en:"Aomori",coords:[40.8244,140.74]},{jp:"盛岡",en:"Morioka",coords:[39.7036,141.1527]},{jp:"秋田",en:"Akita",coords:[39.7186,140.1024]},{jp:"山形",en:"Yamagata",coords:[38.2554,140.3396]},{jp:"福島",en:"Fukushima",coords:[37.7608,140.4747]},{jp:"水戸",en:"Mito",coords:[36.3659,140.4714]},{jp:"前橋",en:"Maebashi",coords:[36.3895,139.0634]},{jp:"長野",en:"Nagano",coords:[36.6485,138.1942]},{jp:"富山",en:"Toyama",coords:[36.6953,137.2113]},{jp:"福井",en:"Fukui",coords:[36.0641,136.2196]},{jp:"岐阜",en:"Gifu",coords:[35.4233,136.7607]},{jp:"津",en:"Tsu",coords:[34.7186,136.5052]},{jp:"奈良",en:"Nara",coords:[34.6851,135.8048]}
+      ].sort(()=>Math.random()-0.5);
 
-    let cities=[], index=0, started=false, answered=false, markers=[], circles=[], score=0, startTime=null, timerInterval=null;
-    let isGameOver = false, deathCity = "", currentCityMarker = null;
-
-    // 使用 Voyager 亮色標籤地圖
-    const map = L.map('map', {zoomControl:false}).setView([60, 95], 3);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png').addTo(map);
-
-    const timeEl=document.getElementById('time'), progressEl=document.getElementById('progress');
-    const scoreEl=document.getElementById('score'), aliveStatusEl=document.getElementById('aliveStatus');
-    const cityTitle=document.getElementById('cityTitle'), endModal=document.getElementById('endModal');
-
-    function haversine(a,b){
-      const R=6371;
-      const dLat=(b[0]-a[0])*Math.PI/180, dLon=(b[1]-a[1])*Math.PI/180;
-      const aa=Math.sin(dLat/2)**2 + Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLon/2)**2;
-      return R*2*Math.atan2(Math.sqrt(aa),Math.sqrt(1-aa));
-    }
-
-    function resetGame(){
-      cities = [...RUSSIA_CITIES].sort(() => Math.random() - 0.5);
-      index=0; score=0; started=false; isGameOver=false; deathCity="";
-      clearMapObjects();
-      progressEl.textContent="0"; scoreEl.textContent="0"; timeEl.textContent="00:00";
-      aliveStatusEl.textContent="ALIVE"; aliveStatusEl.className="info-value status-alive";
-      document.getElementById('statusBox').style.display='none';
-      if(timerInterval) clearInterval(timerInterval);
-      document.getElementById('overlayStart').style.display='flex';
-      endModal.style.display='none';
-      cityTitle.style.display='none';
-      map.setView([60, 95], 3);
-    }
-
-    function startGame(){
-      document.getElementById('overlayStart').style.display='none';
-      document.getElementById('statusBox').style.display='flex';
-      started=true; startTime=Date.now();
-      timerInterval=setInterval(()=>{
-        const diff=Date.now()-startTime;
-        timeEl.textContent=`${String(Math.floor(diff/60000)).padStart(2,'0')}:${String(Math.floor((diff%60000)/1000)).padStart(2,'0')}`;
-      },1000);
-      showNextCity();
-    }
-
-    function showNextCity(){
-      answered=false;
-      progressEl.textContent=index+1;
-      cityTitle.textContent = cities[index].name;
-      cityTitle.style.display='block';
-      map.flyTo([60, 95], 3, {duration: 1});
-    }
-
-    map.on('click', function(e){
-      if(!started || answered) return;
-      answered=true;
-      const city=cities[index], clickCoords=[e.latlng.lat, e.latlng.lng];
-      const dist=haversine(clickCoords, city.coords);
+      let idx=0, score=0, startTime, timer, started=false, answered=false, markers=[], circles=[];
+      let gameOver=false, deathCity="";
       
-      markers.push(L.circleMarker(clickCoords, {radius:8, color:'#3b82f6', fillOpacity:1}).addTo(map));
-      // 俄羅斯版誤差範圍設為 100km (100000公尺)
-      circles.push(L.circle(city.coords, {radius: 100000, color: '#22c55e', weight: 3, fillOpacity: 0.2}).addTo(map));
-      currentCityMarker = L.marker(city.coords).addTo(map).bindPopup(`<b>${city.name}</b><br>${dist.toFixed(1)} km`).openPopup();
+      const map = L.map('map',{zoomControl:false, attributionControl: false}).setView([37, 137], 5);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png').addTo(map);
 
-      if(dist <= 100) {
-        score += Math.max(10, Math.round(100 - (dist / 10) * 5));
-        scoreEl.textContent = score;
-      } else if(!isGameOver) {
-        isGameOver=true; deathCity=city.name;
-        aliveStatusEl.textContent="OUT";
-        aliveStatusEl.className="info-value status-dead";
+      const belt = document.getElementById('belt');
+      CITIES.forEach((c) => {
+        const el = document.createElement('div');
+        el.className = 'city-card';
+        el.innerHTML = `<span class="city-name-jp">${c.jp}</span><span class="city-name-en">${c.en}</span>`;
+        belt.appendChild(el);
+      });
+
+      function haversine(a,b){
+        const R=6371;
+        const dLat=(b[0]-a[0])*Math.PI/180, dLon=(b[1]-a[1])*Math.PI/180;
+        const aa=Math.sin(dLat/2)**2+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLon/2)**2;
+        return R*2*Math.atan2(Math.sqrt(aa),Math.sqrt(1-aa));
       }
 
-      map.flyTo(city.coords, 6, {duration: 0.8});
-      
-      setTimeout(()=>{
-        clearMapObjects();
-        index++;
-        if(index < 30) {
-            showNextCity();
-        } else {
-            endGame();
+      function updateConveyor() {
+        const offset = -(idx * 350) - 175;
+        belt.style.transform = `translateX(${offset}px)`;
+        const cards = document.querySelectorAll('.city-card');
+        cards.forEach((card, i) => {
+          card.classList.toggle('active', i === idx);
+        });
+        document.getElementById('progress').textContent = idx + 1;
+      }
+
+      document.getElementById('startBtn').onclick = function() {
+        document.getElementById('overlayStart').style.display='none';
+        document.getElementById('statusBox').style.display='flex';
+        started=true; startTime=Date.now();
+        timer=setInterval(()=>{
+          const d=Date.now()-startTime;
+          document.getElementById('time').textContent=`${String(Math.floor(d/60000)).padStart(2,'0')}:${String(Math.floor((d%60000)/1000)).padStart(2,'0')}`;
+        },1000);
+        updateConveyor();
+      };
+
+      map.on('click', e => {
+        if(!started||answered) return; answered=true;
+        const city=CITIES[idx], dist=haversine([e.latlng.lat,e.latlng.lng], city.coords);
+        
+        L.circleMarker([e.latlng.lat,e.latlng.lng],{radius:6,color:'#3b82f6',fillOpacity:0.8}).addTo(map);
+        const targetCircle = L.circle(city.coords,{radius:100000,color:'#22c55e',weight:2,fillOpacity:0.15}).addTo(map);
+        const targetMarker = L.marker(city.coords).addTo(map).bindPopup(`<b>${city.jp} (${city.en})</b><br>${dist.toFixed(1)} km`).openPopup();
+        
+        markers.push(targetMarker); circles.push(targetCircle);
+
+        if(dist<=100){
+          score += Math.max(10, Math.round(100 - dist));
+          document.getElementById('score').textContent = score;
+        } else if(!gameOver){
+          gameOver = true; deathCity = `${city.jp} (${city.en})`;
+          document.getElementById('aliveStatus').textContent = "OUT";
+          document.getElementById('aliveStatus').className = "info-value status-dead";
         }
-      }, 2000);
-    });
-
-    function clearMapObjects(){
-      markers.forEach(m=>map.removeLayer(m)); markers=[];
-      circles.forEach(c=>map.removeLayer(c)); circles=[];
-      if(currentCityMarker) { map.removeLayer(currentCityMarker); currentCityMarker=null; }
-    }
-
-    function endGame(){
-      started=false; clearInterval(timerInterval);
-      cityTitle.style.display='none';
-      const stats = document.getElementById('stats');
-      const resultTitle = document.getElementById('resultTitle');
-
-      if(isGameOver) {
-        resultTitle.textContent = "Eliminated!";
-        resultTitle.style.color = "#ef4444";
-        stats.innerHTML = `You failed at <b>${deathCity}</b>.<br><br>Final Score: <b>${score}</b><br>Total Time: <b>${timeEl.textContent}</b>`;
-      } else {
-        resultTitle.textContent = "Survivor!";
-        resultTitle.style.color = "#22c55e";
-        stats.innerHTML = `You completed the Russian challenge!<br><br>Final Score: <b>${score}</b><br>Total Time: <b>${timeEl.textContent}</b>`;
-      }
-      endModal.style.display='flex';
-    }
-
-    document.getElementById('startBtn').addEventListener('click', startGame);
-    document.getElementById('playAgainBtn').addEventListener('click', resetGame);
-    resetGame();
+        
+        map.flyTo(city.coords, 8, {duration: 0.5});
+        
+        setTimeout(()=>{
+          idx++;
+          if(idx < CITIES.length) {
+            updateConveyor();
+            answered = false;
+            map.flyTo([37, 137], 5, {duration: 0.6});
+          } else {
+            clearInterval(timer);
+            document.getElementById('resTitle').textContent = gameOver ? "FAILED" : "JAPAN MASTER";
+            document.getElementById('stats').innerHTML = `Score: <b>${score}</b><br>Time: <b>${document.getElementById('time').textContent}</b>${gameOver ? `<br>Lost at: ${deathCity}` : ''}`;
+            document.getElementById('endModal').style.display='flex';
+          }
+        }, 1400);
+      });
+    };
   </script>
 </body>
 </html>
