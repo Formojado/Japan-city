@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Japan Speedrun - Pro Edition</title>
+  <title>Japan Speedrun - Bright Edition</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     :root {
-      --primary: #5eead4;
+      --primary: #5eead4; /* 螢光青色 */
       --accent: #f43f5e;
       --bg-glass: rgba(15, 23, 42, 0.9);
     }
 
-    html, body { height: 100%; margin: 0; font-family: 'Inter', -apple-system, sans-serif; background: #000; overflow: hidden; }
+    html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: #000; overflow: hidden; }
     #map { height: 100vh; width: 100vw; z-index: 1; cursor: crosshair; }
 
-    /* Top Navigation */
+    /* Header & Conveyor */
     .header-ui {
       position: absolute; top: 0; left: 0; width: 100%; height: 160px;
       background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
@@ -24,45 +24,51 @@
     }
     .conveyor-viewport {
       position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-      width: 100%; height: 120px; overflow: hidden;
+      width: 100%; height: 130px; overflow: hidden;
     }
     .conveyor-belt {
       display: flex; align-items: center; position: absolute; left: 50%;
       transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
     .city-card { min-width: 320px; text-align: center; opacity: 0.1; transform: scale(0.8); transition: 0.5s; }
-    .city-card.active { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 20px rgba(94, 234, 212, 0.4)); }
-    .city-name-jp { font-size: 3.8rem; font-weight: 900; color: #fff; display: block; font-family: "Hiragino Sans", sans-serif; }
-    .city-name-en { font-size: 1rem; color: #94a3b8; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
+    .city-card.active { opacity: 1; transform: scale(1.1); }
+    
+    /* 城市名樣式優化 */
+    .city-name-jp { 
+      font-size: 4rem; font-weight: 900; color: #fff; display: block; 
+      font-family: "Hiragino Sans", sans-serif; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+    }
+    .city-name-en { 
+      font-size: 1.2rem; color: var(--primary); /* 這裡改亮了 */
+      font-weight: 800; letter-spacing: 5px; text-transform: uppercase; 
+      text-shadow: 0 0 10px rgba(94, 234, 212, 0.6); /* 增加發光感 */
+    }
 
-    /* Bottom Left Panel */
+    /* Info Panel - Bottom Left */
     .stats-panel {
       position: absolute; bottom: 30px; left: 30px; z-index: 1002;
       background: var(--bg-glass); padding: 22px; border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.5); color: #fff; min-width: 180px;
+      border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(15px);
+      color: #fff; min-width: 180px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
     .stat-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
-    .stat-label { font-size: 0.7rem; color: #64748b; font-weight: 800; letter-spacing: 1.5px; }
-    .stat-value { font-size: 1.6rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--primary); }
-    .stat-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 12px 0; }
+    .stat-label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; letter-spacing: 1.5px; }
+    .stat-value { font-size: 1.7rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--primary); }
+    .stat-divider { height: 1px; background: rgba(255,255,255,0.1); margin: 12px 0; }
 
-    /* Confirm Button */
-    #confirmContainer { position: absolute; bottom: 45px; left: 50%; transform: translateX(-50%); z-index: 1005; display: none; }
+    /* Action Button */
+    #confirmContainer { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 1005; display: none; }
     .btn-confirm {
       background: #fff; color: #000; border: none; padding: 18px 60px; border-radius: 12px;
-      font-size: 1.1rem; font-weight: 900; cursor: pointer; letter-spacing: 1px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: 0.2s;
+      font-size: 1.2rem; font-weight: 900; cursor: pointer; letter-spacing: 1px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: 0.2s;
     }
-    .btn-confirm:hover { transform: scale(1.05); background: var(--primary); }
+    .btn-confirm:hover { background: var(--primary); transform: scale(1.05); }
 
-    /* Modals */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-    .modal-box { text-align: center; padding: 60px; background: #111; border-radius: 30px; border: 1px solid #222; width: 420px; }
-    .btn-start {
-      background: var(--primary); color: #000; border: none; padding: 20px; width: 100%;
-      border-radius: 14px; font-size: 1.2rem; font-weight: 900; cursor: pointer; margin-top: 40px;
-    }
+    /* Modal Styles */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-box { text-align: center; padding: 50px; background: #111; border-radius: 30px; border: 1px solid #333; width: 400px; color: #fff; }
+    .btn-start { background: var(--primary); color: #000; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 1.2rem; font-weight: 900; cursor: pointer; margin-top: 30px; }
   </style>
 </head>
 <body>
@@ -79,7 +85,7 @@
     <div class="stat-divider"></div>
     <div class="stat-row"><span class="stat-label">TIME</span><span id="time" class="stat-value">00:00</span></div>
     <div class="stat-divider"></div>
-    <div class="stat-row"><span class="stat-label">PROGRESS</span><span class="stat-value"><span id="progress">0</span><span style="color:#444; font-size:1rem"> / <span id="total">0</span></span></span></div>
+    <div class="stat-row"><span class="stat-label">PROGRESS</span><span class="stat-value"><span id="progress">0</span><span style="color:#444">/</span><span id="total">0</span></span></div>
   </div>
 
   <div id="confirmContainer">
@@ -88,9 +94,9 @@
 
   <div id="startModal" class="modal-overlay">
     <div class="modal-box">
-      <h1 style="color:#fff; font-size: 2.5rem; margin:0">Japan Quiz</h1>
-      <p style="color:#555; letter-spacing: 2px">PRO GEOGUESSR STYLE</p>
-      <div style="margin:50px 0;">
+      <h1 style="font-size: 2.5rem; margin:0">Japan Quiz</h1>
+      <p style="color:#666; letter-spacing: 2px">BRIGHT EDITION</p>
+      <div style="margin:40px 0;">
         <div style="font-size: 5rem; font-weight:900; color:var(--primary)" id="countDisplay">20</div>
         <input type="range" id="citySlider" min="5" max="50" value="20" style="width:100%; accent-color: var(--primary);">
       </div>
@@ -100,8 +106,8 @@
 
   <div id="endModal" class="modal-overlay" style="display:none">
     <div class="modal-box">
-      <h2 style="color:var(--primary); font-size: 2.5rem;">RESULT</h2>
-      <div id="finalStats" style="color:#fff; margin:40px 0; font-size:1.4rem; line-height:2"></div>
+      <h2 style="color:var(--primary); font-size: 2.5rem;">GAME OVER</h2>
+      <div id="finalStats" style="margin:40px 0; font-size:1.4rem; line-height:2"></div>
       <button onclick="location.reload()" class="btn-start">RETRY</button>
     </div>
   </div>
@@ -114,10 +120,8 @@
     let cities=[], idx=0, score=0, startTime, timer, started=false;
     let currentClickPos = null, tempMarker = null;
 
-    // 地圖初始化：使用 Google Maps 混合圖資風格 (GeoGuessr Style)
+    // 地圖：Google Maps Style (GeoGuessr)
     const map = L.map('map',{zoomControl:false, attributionControl: false}).setView([37, 137], 5);
-    
-    // 使用 Google Maps 的路網圖層，地名會依照瀏覽器語系/地理位置顯示日文
     L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
       subdomains:['mt0','mt1','mt2','mt3']
     }).addTo(map);
@@ -125,8 +129,6 @@
     const slider = document.getElementById('citySlider');
     const display = document.getElementById('countDisplay');
     slider.oninput = () => display.textContent = slider.value;
-
-    document.getElementById('startBtn').addEventListener('click', startGame);
 
     function startGame() {
       if(started) return;
@@ -178,7 +180,7 @@
       if(!started) return;
       currentClickPos = e.latlng;
       if(tempMarker) map.removeLayer(tempMarker);
-      tempMarker = L.circleMarker(e.latlng, {radius: 12, color: '#fff', fillColor: '#000', weight: 5, fillOpacity: 1}).addTo(map);
+      tempMarker = L.circleMarker(e.latlng, {radius: 12, color: '#fff', fillColor: '#000', weight: 4, fillOpacity: 1}).addTo(map);
       document.getElementById('confirmContainer').style.display = 'block';
     });
 
@@ -188,14 +190,13 @@
       const dist = haversine([currentClickPos.lat, currentClickPos.lng], city.coords);
       document.getElementById('confirmContainer').style.display = 'none';
 
-      const line = L.polyline([currentClickPos, city.coords], {color: '#fff', weight: 4, dashArray: '12, 12'}).addTo(map);
-      
+      const line = L.polyline([currentClickPos, city.coords], {color: '#fff', weight: 4, dashArray: '10, 10'}).addTo(map);
       const popup = L.popup({closeButton: false, offset: [0, -10]})
         .setLatLng(city.coords)
         .setContent(`<div style="text-align:center; padding: 5px; color:#000; font-weight:800"><b>${city.jp}</b><br>${dist.toFixed(1)} km</div>`)
         .openOn(map);
 
-      score += Math.max(0, 5000 - Math.round(dist * 20)); // GeoGuessr 風格計分
+      score += Math.max(0, 5000 - Math.round(dist * 20));
       document.getElementById('score').textContent = score;
 
       map.flyTo(city.coords, 8, {duration: 0.5});
@@ -218,23 +219,19 @@
     function endGame() {
       started = false;
       clearInterval(timer);
-      document.getElementById('finalStats').innerHTML = `Final Score: <b style="color:var(--primary)">${score}</b><br>Time: <b>${document.getElementById('time').textContent}</b>`;
+      document.getElementById('finalStats').innerHTML = `Score: <b style="color:var(--primary)">${score}</b><br>Time: <b>${document.getElementById('time').textContent}</b>`;
       document.getElementById('endModal').style.display = 'flex';
     }
 
-    // Keydown Listener for Space and Enter
     window.addEventListener('keydown', e => {
       if(e.code === 'Space' || e.code === 'Enter') {
         e.preventDefault();
-        if(!started) {
-          startGame();
-        } else if(document.getElementById('confirmContainer').style.display === 'block') {
-          submitAnswer();
-        }
+        if(!started) startGame();
+        else if(document.getElementById('confirmContainer').style.display === 'block') submitAnswer();
       }
     });
 
-    document.getElementById('confirmBtn').onclick = submitAnswer;
+    document.getElementById('startBtn').onclick = startGame;
   </script>
 </body>
 </html>
