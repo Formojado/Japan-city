@@ -11,56 +11,53 @@
       --primary: #5eead4;
       --accent: #f43f5e;
       --bg-glass: rgba(15, 23, 42, 0.9);
-      --text-en: #e2e8f0;
     }
 
     html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: #000; overflow: hidden; }
     #map { height: 100vh; width: 100vw; z-index: 1; cursor: crosshair; }
 
-    /* UI Elements */
-    .header-ui {
-      position: absolute; top: 0; left: 0; width: 100%; height: 160px;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
-      z-index: 1001; pointer-events: none;
-    }
+    /* UI Header */
+    .header-ui { position: absolute; top: 0; left: 0; width: 100%; height: 160px; background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%); z-index: 1001; pointer-events: none; }
     .conveyor-viewport { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); width: 100%; height: 130px; overflow: hidden; }
     .conveyor-belt { display: flex; align-items: center; position: absolute; left: 50%; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .city-card { min-width: 320px; text-align: center; opacity: 0.1; transform: scale(0.8); transition: 0.5s; }
     .city-card.active { opacity: 1; transform: scale(1.1); }
-    
     .city-name-jp { font-size: 4rem; font-weight: 900; color: #fff; display: block; text-shadow: 0 4px 10px rgba(0,0,0,0.9); }
-    .city-name-en { font-size: 1.2rem; color: var(--text-en); font-weight: 700; letter-spacing: 6px; text-transform: uppercase; }
+    .city-name-en { font-size: 1.2rem; color: #e2e8f0; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; }
 
     /* Stats Panel */
     .stats-panel {
       position: absolute; bottom: 30px; left: 30px; z-index: 1002;
       background: var(--bg-glass); padding: 22px; border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px);
-      color: #fff; min-width: 180px;
+      border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); color: #fff; min-width: 180px;
     }
-    .stat-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+    .stat-row { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; position: relative; }
     .stat-label { font-size: 0.7rem; color: #94a3b8; font-weight: 800; }
     .stat-value { font-size: 1.7rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--primary); transition: 0.2s; }
-    .score-bump { transform: scale(1.2); color: #fff; }
+    .score-bump { transform: scale(1.3); color: #fff; text-shadow: 0 0 10px var(--primary); }
 
-    /* Flying Particle */
+    /* 高辨識度飛行動畫粒子 */
     .fly-particle {
       position: fixed; z-index: 9999; pointer-events: none;
-      color: var(--primary); font-weight: 900; font-size: 1.5rem;
-      text-shadow: 0 0 10px rgba(94, 234, 212, 0.8);
-      transition: all 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+      background: rgba(0, 0, 0, 0.85); /* 黑底塊 */
+      color: var(--primary); font-weight: 900; font-size: 1.8rem;
+      padding: 5px 15px; border-radius: 10px;
+      border: 2px solid var(--primary); /* 青色框 */
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      transition: all 0.9s cubic-bezier(0.5, -0.3, 0.7, 0.1);
     }
 
+    /* Confirm Button */
     #confirmContainer { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 1005; display: none; }
-    .btn-confirm { background: #fff; color: #000; border: none; padding: 18px 60px; border-radius: 12px; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
+    .btn-confirm { background: #fff; color: #000; border: none; padding: 18px 60px; border-radius: 12px; font-size: 1.2rem; font-weight: 900; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 
-    /* Fuji Modal */
+    /* Start Screen with Fuji */
     .modal-overlay { 
       position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000;
       background: url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
     }
-    .modal-overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: -1; }
-    .modal-box { text-align: center; padding: 50px; background: rgba(17, 24, 39, 0.8); border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); width: 400px; color: #fff; backdrop-filter: blur(10px); }
+    .modal-overlay::before { content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.4); z-index: -1; }
+    .modal-box { text-align: center; padding: 50px; background: rgba(17, 24, 39, 0.85); border-radius: 30px; width: 400px; color: #fff; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
     .btn-start { background: var(--primary); color: #000; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 1.2rem; font-weight: 900; cursor: pointer; margin-top: 30px; }
   </style>
 </head>
@@ -74,13 +71,11 @@
   </div>
   <div id="confirmContainer"><button class="btn-confirm" id="confirmBtn">CONFIRM [SPACE]</button></div>
 
-  <div id="startModal" class="modal-overlay"><div class="modal-box"><h1>Japan Speedrun</h1><div style="margin:40px 0;"><div style="font-size: 5rem; font-weight:900; color:var(--primary)" id="countDisplay">20</div><input type="range" id="citySlider" min="5" max="50" value="20" style="width:100%;"></div><button id="startBtn" class="btn-start">START (ENTER)</button></div></div>
-  <div id="endModal" class="modal-overlay" style="display:none; background: rgba(0,0,0,0.95);"><div class="modal-box"><h2>COMPLETE</h2><div id="finalStats" style="margin:40px 0; font-size:1.4rem;"></div><button onclick="location.reload()" class="btn-start">PLAY AGAIN</button></div></div>
+  <div id="startModal" class="modal-overlay"><div class="modal-box"><h1>Japan Speedrun</h1><div style="margin:40px 0;"><div style="font-size: 5rem; font-weight:900; color:var(--primary)" id="countDisplay">20</div><input type="range" id="citySlider" min="5" max="50" value="20" style="width:100%; accent-color: var(--primary);"></div><button id="startBtn" class="btn-start">START (ENTER)</button></div></div>
+  <div id="endModal" class="modal-overlay" style="display:none; background:rgba(0,0,0,0.95)"><div class="modal-box"><h2>COMPLETE</h2><div id="finalStats" style="margin:40px 0; font-size:1.4rem;"></div><button onclick="location.reload()" class="btn-start">PLAY AGAIN</button></div></div>
 
   <script>
-    const DB = [
-      {jp:"東京",en:"Tokyo",coords:[35.6895,139.6917]},{jp:"横浜",en:"Yokohama",coords:[35.4433,139.6358]},{jp:"大阪",en:"Osaka",coords:[34.6937,135.5023]},{jp:"名古屋",en:"Nagoya",coords:[35.1815,136.9066]},{jp:"札幌",en:"Sapporo",coords:[43.0611,141.3564]},{jp:"福岡",en:"Fukuoka",coords:[33.5904,130.4017]},{jp:"神戸",en:"Kobe",coords:[34.6901,135.1955]},{jp:"京都",en:"Kyoto",coords:[35.0116,135.7681]},{jp:"広島",en:"Hiroshima",coords:[34.3853,132.4553]},{jp:"仙台",en:"Sendai",coords:[38.2682,140.8694]},{jp:"金沢",en:"Kanazawa",coords:[36.5613,136.6562]},{jp:"鹿児島",en:"Kagoshima",coords:[31.5967,130.5571]},{jp:"奈良",en:"Nara",coords:[34.6851,135.8048]},{jp:"那覇",en:"Naha",coords:[26.2124,127.6809]},{jp:"函館",en:"Hakodate",coords:[41.7687,140.7288]},{jp:"松山",en:"Matsuyama",coords:[33.8392,132.765]},{jp:"熊本",en:"Kumamoto",coords:[32.8032,130.7079]},{jp:"岡山",en:"Okayama",coords:[34.6551,133.9195]},{jp:"静岡",en:"Shizuoka",coords:[34.9756,138.3825]},{jp:"新潟",en:"Niigata",coords:[37.9162,139.0364]}
-    ];
+    const DB = [{jp:"東京",en:"Tokyo",coords:[35.6895,139.6917]},{jp:"横浜",en:"Yokohama",coords:[35.4433,139.6358]},{jp:"大阪",en:"Osaka",coords:[34.6937,135.5023]},{jp:"名古屋",en:"Nagoya",coords:[35.1815,136.9066]},{jp:"札幌",en:"Sapporo",coords:[43.0611,141.3564]},{jp:"福岡",en:"Fukuoka",coords:[33.5904,130.4017]},{jp:"神戸",en:"Kobe",coords:[34.6901,135.1955]},{jp:"京都",en:"Kyoto",coords:[35.0116,135.7681]},{jp:"広島",en:"Hiroshima",coords:[34.3853,132.4553]},{jp:"仙台",en:"Sendai",coords:[38.2682,140.8694]},{jp:"金沢",en:"Kanazawa",coords:[36.5613,136.6562]},{jp:"鹿児島",en:"Kagoshima",coords:[31.5967,130.5571]},{jp:"奈良",en:"Nara",coords:[34.6851,135.8048]},{jp:"那覇",en:"Naha",coords:[26.2124,127.6809]},{jp:"函館",en:"Hakodate",coords:[41.7687,140.7288]},{jp:"松山",en:"Matsuyama",coords:[33.8392,132.765]},{jp:"熊本",en:"Kumamoto",coords:[32.8032,130.7079]},{jp:"岡山",en:"Okayama",coords:[34.6551,133.9195]},{jp:"静岡",en:"Shizuoka",coords:[34.9756,138.3825]},{jp:"新潟",en:"Niigata",coords:[37.9162,139.0364]}];
 
     let cities=[], idx=0, score=0, startTime, timer, started=false;
     let currentClickPos = null, playerMarker = null, targetMarker = null, connectorLine = null;
@@ -140,28 +135,31 @@
       if(!started || !currentClickPos) return;
       const city = cities[idx];
       const dist = haversine([currentClickPos.lat, currentClickPos.lng], city.coords);
-      const points = Math.max(0, 5000 - Math.round(dist * 20));
+      
+      // GeoGuessr Scoring Formula
+      const points = Math.round(5000 * Math.pow(Math.E, -dist / 200));
+      
       document.getElementById('confirmContainer').style.display = 'none';
 
       targetMarker = L.circleMarker(city.coords, {radius: 12, color: '#fff', fillColor: '#5eead4', weight: 4, fillOpacity: 1}).addTo(map);
       connectorLine = L.polyline([currentClickPos, city.coords], {color: '#fff', weight: 3, dashArray: '10, 10'}).addTo(map);
 
-      // Create Flying Animation
+      // Flying Animation with Black Block and Stroke
       const clickPoint = map.latLngToContainerPoint(currentClickPos);
       const scoreBox = document.getElementById('score').getBoundingClientRect();
       
       const particle = document.createElement('div');
       particle.className = 'fly-particle';
       particle.textContent = `+${points}`;
-      particle.style.left = clickPoint.x + 'px';
-      particle.style.top = clickPoint.y + 'px';
+      particle.style.left = (clickPoint.x - 40) + 'px';
+      particle.style.top = (clickPoint.y - 20) + 'px';
       document.body.appendChild(particle);
 
       setTimeout(() => {
         particle.style.left = scoreBox.left + 'px';
         particle.style.top = scoreBox.top + 'px';
         particle.style.opacity = '0';
-        particle.style.transform = 'scale(0.5)';
+        particle.style.transform = 'scale(0.3)';
       }, 50);
 
       setTimeout(() => {
@@ -169,9 +167,9 @@
         const scoreEl = document.getElementById('score');
         scoreEl.textContent = score;
         scoreEl.classList.add('score-bump');
-        setTimeout(() => scoreEl.classList.remove('score-bump'), 200);
+        setTimeout(() => scoreEl.classList.remove('score-bump'), 300);
         particle.remove();
-      }, 850);
+      }, 900);
 
       map.flyTo(city.coords, 8, {duration: 0.5});
       setTimeout(() => {
@@ -180,7 +178,7 @@
         if(targetMarker) map.removeLayer(targetMarker);
         if(connectorLine) map.removeLayer(connectorLine);
         if(idx < cities.length) { updateConveyor(); map.flyTo([37, 137], 5, {duration: 0.6}); }
-        else { endGame(); }
+        else endGame();
       }, 2500);
     }
 
@@ -197,8 +195,8 @@
         else if(document.getElementById('confirmContainer').style.display === 'block') submitAnswer();
       }
     });
-    document.getElementById('startBtn').onclick = startGame;
     document.getElementById('confirmBtn').onclick = submitAnswer;
+    document.getElementById('startBtn').onclick = startGame;
   </script>
 </body>
 </html>
