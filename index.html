@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Japan Speedrun - Refined Visuals</title>
+  <title>Japan Speedrun</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
@@ -11,7 +11,7 @@
       --primary: #5eead4;
       --accent: #f43f5e;
       --bg-glass: rgba(15, 23, 42, 0.9);
-      --text-en: #e2e8f0; /* 白色偏灰 */
+      --text-en: #e2e8f0;
     }
 
     html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: #000; overflow: hidden; }
@@ -34,22 +34,14 @@
     .city-card { min-width: 320px; text-align: center; opacity: 0.1; transform: scale(0.8); transition: 0.5s; }
     .city-card.active { opacity: 1; transform: scale(1.1); }
     
-    /* 核心名稱樣式 */
     .city-name-jp { 
       font-size: 4rem; font-weight: 900; color: #fff; display: block; 
       font-family: "Hiragino Sans", "Yu Gothic", sans-serif;
-      /* 加強陰影效果 */
-      text-shadow: 
-        0 4px 8px rgba(0,0,0,0.8),
-        0 0 20px rgba(0,0,0,0.5);
+      text-shadow: 0 4px 10px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5);
     }
     .city-name-en { 
-      font-size: 1.2rem; 
-      color: var(--text-en); /* 白色偏灰 */
-      font-weight: 700; 
-      letter-spacing: 6px; 
-      text-transform: uppercase;
-      margin-top: 2px;
+      font-size: 1.2rem; color: var(--text-en); font-weight: 700; 
+      letter-spacing: 6px; text-transform: uppercase; margin-top: 2px;
     }
 
     /* Stats Panel - Bottom Left */
@@ -64,18 +56,29 @@
     .stat-value { font-size: 1.7rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--primary); }
     .stat-divider { height: 1px; background: rgba(255,255,255,0.05); margin: 12px 0; }
 
-    /* Action Button */
+    /* Confirm Container */
     #confirmContainer { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); z-index: 1005; display: none; }
     .btn-confirm {
       background: #fff; color: #000; border: none; padding: 18px 60px; border-radius: 12px;
       font-size: 1.2rem; font-weight: 900; cursor: pointer; letter-spacing: 1px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: 0.2s;
     }
-    .btn-confirm:hover { background: var(--primary); transform: scale(1.05); }
+    .btn-confirm:hover { background: var(--primary); }
 
-    /* Modal Styles */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-    .modal-box { text-align: center; padding: 50px; background: #111; border-radius: 30px; border: 1px solid #333; width: 400px; color: #fff; }
+    /* Modal - Start Screen with Fuji Background */
+    .modal-overlay { 
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2000;
+      background: url('https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+    }
+    /* 增加一層深色遮罩讓富士山背景不影響閱讀 */
+    .modal-overlay::before {
+      content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: -1;
+    }
+    .modal-box { 
+      text-align: center; padding: 50px; background: rgba(17, 24, 39, 0.8); 
+      border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); width: 400px; color: #fff; 
+      backdrop-filter: blur(10px);
+    }
     .btn-start { background: var(--primary); color: #000; border: none; padding: 18px; width: 100%; border-radius: 12px; font-size: 1.2rem; font-weight: 900; cursor: pointer; margin-top: 30px; }
   </style>
 </head>
@@ -102,8 +105,8 @@
 
   <div id="startModal" class="modal-overlay">
     <div class="modal-box">
-      <h1 style="font-size: 2.5rem; margin:0">Japan Speedrun</h1>
-      <p style="color:#666; letter-spacing: 2px">PRO VISUAL EDITION</p>
+      <h1 style="font-size: 2.8rem; margin:0; letter-spacing: 2px;">Japan Speedrun</h1>
+      <p style="color:#94a3b8; margin-top: 10px;">Find the cities on the map.</p>
       <div style="margin:40px 0;">
         <div style="font-size: 5rem; font-weight:900; color:var(--primary)" id="countDisplay">20</div>
         <input type="range" id="citySlider" min="5" max="50" value="20" style="width:100%; accent-color: var(--primary);">
@@ -112,9 +115,9 @@
     </div>
   </div>
 
-  <div id="endModal" class="modal-overlay" style="display:none">
+  <div id="endModal" class="modal-overlay" style="display:none; background: rgba(0,0,0,0.95);">
     <div class="modal-box">
-      <h2 style="color:var(--primary); font-size: 2.5rem;">COMPLETE</h2>
+      <h2 style="color:var(--primary); font-size: 2.5rem;">MISSION COMPLETE</h2>
       <div id="finalStats" style="margin:40px 0; font-size:1.4rem; line-height:2"></div>
       <button onclick="location.reload()" class="btn-start">PLAY AGAIN</button>
     </div>
@@ -228,6 +231,7 @@
       clearInterval(timer);
       document.getElementById('finalStats').innerHTML = `Score: <b style="color:var(--primary)">${score}</b><br>Time: <b>${document.getElementById('time').textContent}</b>`;
       document.getElementById('endModal').style.display = 'flex';
+      document.getElementById('endModal').style.background = 'rgba(0,0,0,0.95)';
     }
 
     window.addEventListener('keydown', e => {
