@@ -13,7 +13,7 @@
       --bg-glass: rgba(15, 23, 42, 0.9);
     }
 
-    html, body { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background: #000; overflow: hidden; }
+    html, body { height: 100%; margin: 0; font-family: 'Inter', "Hiragino Sans", "Yu Gothic", sans-serif; background: #000; overflow: hidden; }
     #map { height: 100vh; width: 100vw; z-index: 1; cursor: crosshair; }
 
     /* UI Header */
@@ -22,8 +22,26 @@
     .conveyor-belt { display: flex; align-items: center; position: absolute; left: 50%; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
     .city-card { min-width: 320px; text-align: center; opacity: 0.1; transform: scale(0.8); transition: 0.5s; }
     .city-card.active { opacity: 1; transform: scale(1.1); }
-    .city-name-jp { font-size: 4rem; font-weight: 900; color: #fff; display: block; text-shadow: 0 4px 10px rgba(0,0,0,0.9); }
-    .city-name-en { font-size: 1.2rem; color: #e2e8f0; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; }
+
+    /* 城市名稱風格統一 */
+    .city-name-jp { 
+      font-size: 4rem; font-weight: 900; color: #fff; display: block; 
+      text-shadow: 0 0 10px rgba(0,0,0,1), 0 4px 10px rgba(0,0,0,1); 
+    }
+    .city-name-en { 
+      font-size: 1.4rem; 
+      color: #fff; 
+      font-weight: 900; 
+      letter-spacing: 4px; 
+      text-transform: uppercase;
+      /* 讓英文也有日文般的厚重感與黑邊 */
+      text-shadow: 
+        2px 2px 0px #000, 
+        -2px -2px 0px #000, 
+        2px -2px 0px #000, 
+        -2px 2px 0px #000,
+        0 0 15px rgba(0,0,0,0.8);
+    }
 
     /* Stats Panel */
     .stats-panel {
@@ -39,10 +57,10 @@
     /* 高辨識度飛行動畫粒子 */
     .fly-particle {
       position: fixed; z-index: 9999; pointer-events: none;
-      background: rgba(0, 0, 0, 0.85); /* 黑底塊 */
+      background: rgba(0, 0, 0, 0.85);
       color: var(--primary); font-weight: 900; font-size: 1.8rem;
       padding: 5px 15px; border-radius: 10px;
-      border: 2px solid var(--primary); /* 青色框 */
+      border: 2px solid var(--primary);
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
       transition: all 0.9s cubic-bezier(0.5, -0.3, 0.7, 0.1);
     }
@@ -135,19 +153,13 @@
       if(!started || !currentClickPos) return;
       const city = cities[idx];
       const dist = haversine([currentClickPos.lat, currentClickPos.lng], city.coords);
-      
-      // GeoGuessr Scoring Formula
       const points = Math.round(5000 * Math.pow(Math.E, -dist / 200));
-      
       document.getElementById('confirmContainer').style.display = 'none';
-
       targetMarker = L.circleMarker(city.coords, {radius: 12, color: '#fff', fillColor: '#5eead4', weight: 4, fillOpacity: 1}).addTo(map);
       connectorLine = L.polyline([currentClickPos, city.coords], {color: '#fff', weight: 3, dashArray: '10, 10'}).addTo(map);
 
-      // Flying Animation with Black Block and Stroke
       const clickPoint = map.latLngToContainerPoint(currentClickPos);
       const scoreBox = document.getElementById('score').getBoundingClientRect();
-      
       const particle = document.createElement('div');
       particle.className = 'fly-particle';
       particle.textContent = `+${points}`;
